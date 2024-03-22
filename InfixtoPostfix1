@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAX_SIZE 100
+
+typedef struct {
+    char stack[MAX_SIZE];
+    int top;
+} Stack;
+
+void push(Stack *s, char item) {
+    s->stack[++(s->top)] = item;
+}
+
+char pop(Stack *s) {
+    return s->stack[(s->top)--];
+}
+
+int isEmpty(Stack *s) {
+    return (s->top == -1);
+}
+
+int priority(char op) {
+    if (op == '(') return 0;
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return -1;
+}
+
+void infixToPostfix(char *exp, char *result) {
+    Stack s = {{0}, -1};
+    int i = 0, j = 0;
+
+    while (exp[i]) {
+        if (isdigit(exp[i]) || isalpha(exp[i]))
+            result[j++] = exp[i];
+        else if (exp[i] == '(')
+            push(&s, '(');
+        else if (exp[i] == ')') {
+            while (s.top != -1 && s.stack[s.top] != '(')
+                result[j++] = pop(&s);
+            if (s.top != -1 && s.stack[s.top] == '(') pop(&s);
+        } else {
+            while (s.top != -1 && priority(exp[i]) <= priority(s.stack[s.top]))
+                result[j++] = pop(&s);
+            push(&s, exp[i]);
+        }
+        i++;
+    }
+
+    while (s.top != -1)
+        result[j++] = pop(&s);
+
+    result[j] = '\0';
+}
+
+int evaluatePostfix(char *exp) {
+    Stack s = {{0}, -1};
+    int i = 0, operand1, operand2;
+
+    while (exp[i]) {
+        if (isdigit(exp[i]))
+            push(&s, exp[i] - '0');
+        else {
+            operand2 = pop(&s);
+            operand1 = pop(&s);
+            switch (exp[i]) {
+                case '+': push(&s, operand1 + operand2); break;
+                case '-': push(&s, operand1 - operand2); break;
+                case '*': push(&s, operand1 * operand2); break;
+                case '/': push(&s, operand1 / operand2); break;
+            }
+        }
+        i++;
+    }
+
+    return pop(&s);
+}
+
+int main() {
+    char infix[MAX_SIZE], postfix[MAX_SIZE];
+    int result;
+    
+    printf("Enter an infix expression: ");
+    scanf("%s", infix);
+    
+    infixToPostfix(infix, postfix);
+    printf("Postfix expression: %s\n", postfix);
+    
+    result = evaluatePostfix(postfix);
+    printf("Result: %d\n", result);
+    
+    return 0;
+}
