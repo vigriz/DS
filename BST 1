@@ -1,0 +1,161 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct TreeNode {
+    int key;
+    struct TreeNode *left, *right, *parent;
+};
+
+struct TreeNode* createNode(int key) {
+    struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    newNode->key = key;
+    newNode->left = newNode->right = newNode->parent = NULL;
+    return newNode;
+}
+
+struct TreeNode* insert(struct TreeNode* root, int key) {
+    if (root == NULL) return createNode(key);
+    if (key < root->key) {
+        root->left = insert(root->left, key);
+        root->left->parent = root;
+    } else if (key > root->key) {
+        root->right = insert(root->right, key);
+        root->right->parent = root;
+    }
+    return root;
+}
+
+void inorder(struct TreeNode* root) {
+    if (root) {
+        inorder(root->left);
+        printf("%d ", root->key);
+        inorder(root->right);
+    }
+}
+
+void preorder(struct TreeNode* root) {
+    if (root) {
+        printf("%d ", root->key);
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+
+void postorder(struct TreeNode* root) {
+    if (root) {
+        postorder(root->left);
+        postorder(root->right);
+        printf("%d ", root->key);
+    }
+}
+
+struct TreeNode* search(struct TreeNode* root, int key) {
+    if (root == NULL || root->key == key) return root;
+    if (key < root->key) return search(root->left, key);
+    return search(root->right, key);
+}
+
+int countNodes(struct TreeNode* root) {
+    if (root == NULL) return 0;
+    return 1 + countNodes(root->left) + countNodes(root->right);
+}
+
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int height(struct TreeNode* root) {
+    if (root == NULL) return -1;
+    return 1 + max(height(root->left), height(root->right));
+}
+
+struct TreeNode* findMaxNode(struct TreeNode* root) {
+    if (root == NULL) return NULL;
+    while (root->right != NULL) root = root->right;
+    return root;
+}
+
+void displayNodeInfo(struct TreeNode* node) {
+    printf("Node Key: %d\n", node->key);
+    if (node->parent != NULL) {
+        printf("Parent Key: %d\n", node->parent->key);
+    } else {
+        printf("No parent exists for this node.\n");
+    }
+}
+
+int main() {
+    struct TreeNode* root = NULL;
+    int choice, key;
+
+    do {
+        printf("\nBinary Search Tree Operations:");
+        printf("\n1. Insert");
+        printf("\n2. In-order Traversal");
+        printf("\n3. Pre-order Traversal");
+        printf("\n4. Post-order Traversal");
+        printf("\n5. Search Node");
+        printf("\n6. Count Nodes");
+        printf("\n7. Height of Tree");
+        printf("\n8. Find Node with Maximum Key");
+        printf("\n9. Exit");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("\nEnter key to insert: ");
+                scanf("%d", &key);
+                root = insert(root, key);
+                break;
+            case 2:
+                printf("\nIn-order Traversal: ");
+                inorder(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("\nPre-order Traversal: ");
+                preorder(root);
+                printf("\n");
+                break;
+            case 4:
+                printf("\nPost-order Traversal: ");
+                postorder(root);
+                printf("\n");
+                break;
+            case 5:
+                printf("\nEnter key to search: ");
+                scanf("%d", &key);
+                struct TreeNode* foundNode = search(root, key);
+                if (foundNode != NULL) {
+                    printf("Node found:\n");
+                    displayNodeInfo(foundNode);
+                } else {
+                    printf("Node not found.\n");
+                }
+                break;
+            case 6:
+                printf("\nTotal number of nodes: %d\n", countNodes(root));
+                break;
+            case 7:
+                printf("\nHeight of the tree: %d\n", height(root));
+                break;
+            case 8:
+                printf("\nFinding node with maximum key:\n");
+                struct TreeNode* maxNode = findMaxNode(root);
+                if (maxNode != NULL) {
+                    displayNodeInfo(maxNode);
+                } else {
+                    printf("Tree is empty.\n");
+                }
+                break;
+            case 9:
+                printf("\nExiting program...\n");
+                break;
+            default:
+                printf("\nInvalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 9);
+
+    return 0;
+}
