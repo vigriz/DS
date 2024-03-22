@@ -1,87 +1,129 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 
 #define MAX_SIZE 20
 
-typedef struct {
-    int top;
-    char items[MAX_SIZE];
-} Stack;
+char stack[MAX_SIZE];
+int top = -1;
 
-void push(Stack *s, char c) { s->items[++s->top] = c; }
-char pop(Stack *s) { return s->items[s->top--]; }
-int isEmpty(Stack *s) { return s->top == -1; }
-char peek(Stack *s) { return s->items[s->top]; }
-
-int priority(char x) {
-    if (x == '(') return 0;
-    else if (x == '+' || x == '-') return 1;
-    else if (x == '*' || x == '/') return 2;
-    else return -1;
+void push(char x) {
+    if (top == MAX_SIZE - 1) {
+        printf("Stack Overflow\n");
+        return;
+    }
+    stack[++top] = x;
 }
 
-void infixToPrefix(char *infix, char *prefix) {
-    Stack operators;
-    operators.top = -1;
-
-    int len = strlen(infix), j = 0;
-
-    for(int i = len - 1; i >= 0; i--) {
-        char ch = infix[i];
-        if (isalnum(ch)) prefix[j++] = ch;
-        else if (ch == ')') push(&operators, ch);
-        else if (ch == '(') {
-            while (peek(&operators) != ')') prefix[j++] = pop(&operators);
-            pop(&operators); // Discard ')'
-        } else {
-            while (!isEmpty(&operators) && priority(peek(&operators)) >= priority(ch))
-                prefix[j++] = pop(&operators);
-            push(&operators, ch);
-        }
+char pop() {
+    if (top == -1) {
+        printf("Stack Underflow\n");
+        return -1;
     }
+    return stack[top--];
+}
 
-    while (!isEmpty(&operators)) prefix[j++] = pop(&operators);
+int isEmpty() {
+    return top == -1;
+}
+
+char peek() {
+    if (top == -1) {
+        return -1;
+    }
+    return stack[top];
+}
+
+int priority(char x) {
+    if (x == '(')
+        return 0;
+    else if (x == '+' || x == '-')
+        return 1;
+    else if (x == '*' || x == '/')
+        return 2;
+    else
+        return -1; // Invalid operator
+}
+
+void infixToPrefix(char *exp, char *prefix) {
+    int i = 0, j = 0;
+    char x;
+    while (exp[i] != '\0') {
+        if (isalnum(exp[i])) {
+            prefix[j++] = exp[i];
+        } else if (exp[i] == ')') {
+            push(exp[i]);
+        } else if (exp[i] == '(') {
+            while ((x = pop()) != ')') {
+                prefix[j++] = x;
+            }
+        } else {
+            while (!isEmpty() && priority(peek()) >= priority(exp[i])) {
+                prefix[j++] = pop();
+            }
+            push(exp[i]);
+        }
+        i++;
+    }
+    while (!isEmpty()) {
+        prefix[j++] = pop();
+    }
     prefix[j] = '\0';
 
-    for (int start = 0, end = j - 1; start < end; start++, end--) {
+    // Reverse the prefix expression to get the final result
+    int start = 0, end = j - 1;
+    while (start < end) {
         char temp = prefix[start];
         prefix[start] = prefix[end];
         prefix[end] = temp;
+        start++;
+        end--;
     }
 }
 
 int evaluatePrefix(char *prefix) {
-    Stack operands;
-    operands.top = -1;
-
-    int len = strlen(prefix);
-
-    for (int i = len - 1; i >= 0; i--) {
-        char ch = prefix[i];
-        if (isdigit(ch)) push(&operands, ch - '0');
-        else {
-            int operand1 = pop(&operands), operand2 = pop(&operands);
-            switch(ch) {
-                case '+': push(&operands, operand1 + operand2); break;
-                case '-': push(&operands, operand1 - operand2); break;
-                case '*': push(&operands, operand1 * operand2); break;
-                case '/': push(&operands, operand1 / operand2); break;
-                default: printf("Invalid operator: %c\n", ch); return -1;
+    int i = 0, operand1, operand2;
+    while (prefix[i] != '\0') {
+        if (isdigit(prefix[i])) {
+            push(prefix[i] - '0');
+        } else {
+            operand1 = pop();
+            operand2 = pop();
+            switch (prefix[i]) {
+                case '+':
+                    push(operand1 + operand2);
+                    break;
+                case '-':
+                    push(operand1 - operand2);
+                    break;
+                case '*':
+                    push(operand1 * operand2);
+                    break;
+                case '/':
+                    push(operand1 / operand2);
+                    break;
+                default:
+                    printf("Invalid operator in expression!\n");
+                    return -1;
             }
         }
+        i++;
     }
-
-    return pop(&operands);
+    return pop();
 }
 
 int main() {
-    char infix[MAX_SIZE], prefix[MAX_SIZE];
+    char exp[MAX_SIZE], prefix[MAX_SIZE];
+    int result;
+    
     printf("Enter infix expression: ");
-    scanf("%s", infix);
-    infixToPrefix(infix, prefix);
+    scanf("%s", exp);
+    
+    infixToPrefix(exp, prefix);
     printf("Prefix expression: %s\n", prefix);
-    printf("Result: %d\n", evaluatePrefix(prefix));
+    
+    result = evaluatePrefix(prefix);
+    printf("Result: %d\n", result);
+    
     return 0;
 }
