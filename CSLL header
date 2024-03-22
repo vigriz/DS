@@ -1,0 +1,292 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+void insertByOrder(struct Node **head, int data) {
+    struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    if (*head == NULL) {
+        *head = newNode;
+        newNode->next = newNode;
+        return;
+    }
+    struct Node *temp = *head, *prev = NULL;
+    do {
+        if (temp->data >= data) break;
+        prev = temp;
+        temp = temp->next;
+    } while (temp != *head);
+    if (prev == NULL) {
+        newNode->next = *head;
+        *head = newNode;
+        while (temp->next != *head) temp = temp->next;
+        temp->next = newNode;
+    } else {
+        prev->next = newNode;
+        newNode->next = temp;
+    }
+}
+
+void deleteByPosition(struct Node **head, int position) {
+    if (*head == NULL) return;
+    struct Node *temp = *head, *prev = NULL;
+    int count = 1;
+    while (count < position && temp->next != *head) {
+        prev = temp;
+        temp = temp->next;
+        count++;
+    }
+    if (count != position) return;
+    if (prev == NULL) {
+        if (temp->next == *head) {
+            free(temp);
+            *head = NULL;
+        } else {
+            *head = temp->next;
+            struct Node *last = *head;
+            while (last->next != temp) last = last->next;
+            last->next = *head;
+            free(temp);
+        }
+    } else {
+        prev->next = temp->next;
+        free(temp);
+    }
+}
+
+void searchByKey(struct Node *head, int key) {
+    if (head == NULL) return;
+    struct Node *temp = head;
+    int position = 1;
+    do {
+        if (temp->data == key) {
+            printf("Item %d found at position %d.\n", key, position);
+            return;
+        }
+        temp = temp->next;
+        position++;
+    } while (temp != head);
+    printf("Item %d not found in the list.\n", key);
+}
+
+void deleteByKey(struct Node **head, int key) {
+    if (*head == NULL) return;
+    struct Node *temp = *head, *prev = NULL;
+    while (temp->data != key && temp->next != *head) {
+        prev = temp;
+        temp = temp->next;
+    }
+    if (temp->data != key) return;
+    if (prev == NULL) {
+        if (temp->next == *head) {
+            free(temp);
+            *head = NULL;
+        } else {
+            *head = temp->next;
+            struct Node *last = *head;
+            while (last->next != temp) last = last->next;
+            last->next = *head;
+            free(temp);
+        }
+    } else {
+        prev->next = temp->next;
+        free(temp);
+    }
+}
+
+void insertFront(struct Node **head, int data) {
+    struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    if (*head == NULL) {
+        *head = newNode;
+        newNode->next = newNode;
+        return;
+    }
+    struct Node *temp = *head;
+    while (temp->next != *head) temp = temp->next;
+    newNode->next = *head;
+    *head = newNode;
+    temp->next = newNode;
+}
+
+void insertRear(struct Node **head, int data) {
+    struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    if (*head == NULL) {
+        *head = newNode;
+        newNode->next = newNode;
+        return;
+    }
+    struct Node *temp = *head;
+    while (temp->next != *head) temp = temp->next;
+    temp->next = newNode;
+    newNode->next = *head;
+}
+
+void deleteRear(struct Node **head) {
+    if (*head == NULL) return;
+    struct Node *temp = *head, *prev = NULL;
+    while (temp->next != *head) {
+        prev = temp;
+        temp = temp->next;
+    }
+    if (prev == NULL) {
+        if (temp->next == *head) {
+            free(temp);
+            *head = NULL;
+        }
+    } else {
+        prev->next = *head;
+        free(temp);
+    }
+}
+
+void deleteFront(struct Node **head) {
+    if (*head == NULL) return;
+    struct Node *temp = *head, *prev = NULL;
+    while (temp->next != *head) temp = temp->next;
+    if (temp == *head) {
+        free(temp);
+        *head = NULL;
+    } else {
+        temp->next = (*head)->next;
+        free(*head);
+        *head = temp->next;
+    }
+}
+
+void searchByPosition(struct Node *head, int position) {
+    if (head == NULL) return;
+    struct Node *temp = head;
+    int count = 1;
+    do {
+        if (count == position) {
+            printf("Item at position %d is %d.\n", position, temp->data);
+            return;
+        }
+        temp = temp->next;
+        count++;
+    } while (temp != head);
+    printf("Position %d is out of range.\n", position);
+}
+
+void insertByPosition(struct Node **head, int data, int position) {
+    if (position < 1) {
+        printf("Invalid position. Insertion failed.\n");
+        return;
+    }
+    struct Node *newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    if (*head == NULL) {
+        if (position == 1) {
+            *head = newNode;
+            newNode->next = *head;
+        } else {
+            printf("Invalid position. Insertion failed.\n");
+            free(newNode);
+        }
+        return;
+    }
+    if (position == 1) {
+        struct Node *temp = *head;
+        while (temp->next != *head) temp = temp->next;
+        temp->next = newNode;
+        newNode->next = *head;
+        *head = newNode;
+    } else {
+        struct Node *temp = *head;
+        int count = 1;
+        while (count < position - 1 && temp->next != *head) {
+            temp = temp->next;
+            count++;
+        }
+        if (count != position - 1) {
+            printf("Position %d is out of range.\n", position);
+            free(newNode);
+            return;
+        }
+        newNode->next = temp->next;
+        temp->next = newNode;
+    }
+}
+
+void searchByValue(struct Node *head, int value) {
+    if (head == NULL) return;
+    struct Node *temp = head;
+    int position = 1;
+    do {
+  if (temp->data == value) {
+            printf("Value %d found at position %d.\n", value, position);
+            return;
+        }
+        temp = temp->next;
+        position++;
+    } while (temp != head);
+    printf("Value %d not found in the list.\n", value);
+}
+
+void displayList(struct Node *head) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *temp = head;
+    do {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    } while (temp != head);
+    printf("\n");
+}
+
+int main() {
+    struct Node *head = NULL;
+
+    insertByOrder(&head, 5);
+    displayList(head);
+
+    insertByOrder(&head, 3);
+    displayList(head);
+
+    insertByOrder(&head, 7);
+    displayList(head);
+
+    insertByOrder(&head, 1);
+    displayList(head);
+
+    deleteByPosition(&head, 2);
+    displayList(head);
+
+    searchByKey(head, 5);
+    searchByKey(head, 8);
+
+    deleteByKey(&head, 3);
+    displayList(head);
+
+    insertFront(&head, 10);
+    displayList(head);
+
+    insertRear(&head, 8);
+    displayList(head);
+
+    deleteRear(&head);
+    displayList(head);
+
+    deleteFront(&head);
+    displayList(head);
+
+    searchByPosition(head, 3);
+    searchByPosition(head, 5);
+
+    insertByPosition(&head, 6, 2);
+    displayList(head);
+
+    searchByValue(head, 7);
+    searchByValue(head, 9);
+
+    return 0;
+}
+
