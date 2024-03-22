@@ -1,0 +1,189 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 10
+
+struct Queue {
+    int *array;
+    int front, rear, size;
+};
+
+// Function to create a new Queue
+struct Queue* createQueue() {
+    struct Queue *queue = (struct Queue*)malloc(sizeof(struct Queue));
+    if (queue == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    queue->array = (int*)malloc(MAX_SIZE * sizeof(int));
+    if (queue->array == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    queue->front = queue->rear = -1;
+    queue->size = MAX_SIZE;
+    return queue;
+}
+
+// Function to check if the queue is full
+int isFull(struct Queue *queue) {
+    return ((queue->rear + 1) % queue->size == queue->front);
+}
+
+// Function to check if the queue is empty
+int isEmpty(struct Queue *queue) {
+    return (queue->front == -1);
+}
+
+// Function to enqueue an element into Circular Queue
+void enqueueCircular(struct Queue *queue, int item) {
+    if (isFull(queue)) {
+        printf("Queue is full. Enqueue operation failed.\n");
+        return;
+    }
+    if (queue->front == -1) {
+        queue->front = 0;
+    }
+    queue->rear = (queue->rear + 1) % queue->size;
+    queue->array[queue->rear] = item;
+    printf("%d enqueued to Circular Queue\n", item);
+}
+
+// Function to dequeue an element from Circular Queue
+int dequeueCircular(struct Queue *queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty. Dequeue operation failed.\n");
+        exit(1);
+    }
+    int item = queue->array[queue->front];
+    if (queue->front == queue->rear) {
+        queue->front = queue->rear = -1;
+    } else {
+        queue->front = (queue->front + 1) % queue->size;
+    }
+    return item;
+}
+
+// Function to display Circular Queue
+void displayCircular(struct Queue *queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    printf("Circular Queue: ");
+    int i = queue->front;
+    do {
+        printf("%d ", queue->array[i]);
+        i = (i + 1) % queue->size;
+    } while (i != (queue->rear + 1) % queue->size);
+    printf("\n");
+}
+
+// Function to enqueue an element into Priority Queue
+void enqueuePriority(struct Queue *queue, int item) {
+    if (isFull(queue)) {
+        printf("Queue is full. Enqueue operation failed.\n");
+        return;
+    }
+    if (isEmpty(queue)) {
+        queue->front = queue->rear = 0;
+        queue->array[queue->rear] = item;
+        return;
+    }
+    int i = queue->rear;
+    while (i >= 0 && queue->array[i] > item) {
+        queue->array[i + 1] = queue->array[i];
+        i--;
+    }
+    queue->array[i + 1] = item;
+    queue->rear++;
+    printf("%d enqueued to Priority Queue\n", item);
+}
+
+// Function to dequeue an element from Priority Queue
+int dequeuePriority(struct Queue *queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty. Dequeue operation failed.\n");
+        exit(1);
+    }
+    int item = queue->array[queue->front];
+    if (queue->front == queue->rear) {
+        queue->front = queue->rear = -1;
+    } else {
+        queue->front++;
+    }
+    return item;
+}
+
+// Function to display Priority Queue
+void displayPriority(struct Queue *queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    printf("Priority Queue: ");
+    for (int i = queue->front; i <= queue->rear; i++) {
+        printf("%d ", queue->array[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    struct Queue *circularQueue = createQueue();
+    struct Queue *priorityQueue = createQueue();
+
+    int choice, item;
+
+    do {
+        printf("\nMenu:");
+        printf("\n1. Enqueue to Circular Queue");
+        printf("\n2. Dequeue from Circular Queue");
+        printf("\n3. Display Circular Queue");
+        printf("\n4. Enqueue to Priority Queue");
+        printf("\n5. Dequeue from Priority Queue");
+        printf("\n6. Display Priority Queue");
+        printf("\n7. Exit");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter item to enqueue to Circular Queue: ");
+                scanf("%d", &item);
+                enqueueCircular(circularQueue, item);
+                break;
+            case 2:
+                item = dequeueCircular(circularQueue);
+                printf("%d dequeued from Circular Queue\n", item);
+                break;
+            case 3:
+                displayCircular(circularQueue);
+                break;
+            case 4:
+                printf("Enter item to enqueue to Priority Queue: ");
+                scanf("%d", &item);
+                enqueuePriority(priorityQueue, item);
+                break;
+            case 5:
+                item = dequeuePriority(priorityQueue);
+                printf("%d dequeued from Priority Queue\n", item);
+                break;
+            case 6:
+                displayPriority(priorityQueue);
+                break;
+            case 7:
+                printf("Exiting program...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 7);
+
+    // Free allocated memory
+    free(circularQueue->array);
+    free(circularQueue);
+    free(priorityQueue->array);
+    free(priorityQueue);
+
+    return 0;
+}
