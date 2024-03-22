@@ -1,0 +1,242 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for a node in the circular doubly linked list
+struct Node {
+    int data;
+    struct Node *prev;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    if (newNode == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to initialize a header node
+struct Node* initializeHeader() {
+    struct Node* header = createNode(-1); // Assuming -1 as a dummy value for header
+    header->next = header;
+    header->prev = header;
+    return header;
+}
+
+// Function to insert a node by order
+void insertByOrder(struct Node *header, int data) {
+    struct Node *newNode = createNode(data);
+    struct Node *temp = header->next;
+    while (temp != header && temp->data < data) {
+        temp = temp->next;
+    }
+    newNode->prev = temp->prev;
+    newNode->next = temp;
+    temp->prev->next = newNode;
+    temp->prev = newNode;
+}
+
+// Function to delete a node by position
+void deleteByPosition(struct Node *header, int position) {
+    struct Node *temp = header->next;
+    int count = 1;
+    while (temp != header && count < position) {
+        temp = temp->next;
+        count++;
+    }
+    if (temp == header || count != position) {
+        printf("Position %d is out of range.\n", position);
+        return;
+    }
+    temp->prev->next = temp->next;
+    temp->next->prev = temp->prev;
+    free(temp);
+}
+
+// Function to search for an item by key
+void searchByKey(struct Node *header, int key) {
+    struct Node *temp = header->next;
+    int position = 1;
+    while (temp != header && temp->data != key) {
+        temp = temp->next;
+        position++;
+    }
+    if (temp == header) {
+        printf("Item %d not found in the list.\n", key);
+    } else {
+        printf("Item %d found at position %d.\n", key, position);
+    }
+}
+
+// Function to delete a node by key
+void deleteByKey(struct Node *header, int key) {
+    struct Node *temp = header->next;
+    while (temp != header && temp->data != key) {
+        temp = temp->next;
+    }
+    if (temp == header) {
+        printf("Item %d not found in the list. Deletion failed.\n", key);
+        return;
+    }
+    temp->prev->next = temp->next;
+    temp->next->prev = temp->prev;
+    free(temp);
+}
+
+// Function to insert a node at the front
+void insertFront(struct Node *header, int data) {
+    struct Node *newNode = createNode(data);
+    newNode->next = header->next;
+    newNode->prev = header;
+    header->next->prev = newNode;
+    header->next = newNode;
+}
+
+// Function to insert a node at the rear
+void insertRear(struct Node *header, int data) {
+    struct Node *newNode = createNode(data);
+    newNode->next = header;
+    newNode->prev = header->prev;
+    header->prev->next = newNode;
+    header->prev = newNode;
+}
+
+// Function to delete a node at the front
+void deleteFront(struct Node *header) {
+    if (header->next == header) {
+        printf("List is empty. Deletion failed.\n");
+        return;
+    }
+    struct Node *temp = header->next;
+    header->next = temp->next;
+    temp->next->prev = header;
+    free(temp);
+}
+
+// Function to delete a node at the rear
+void deleteRear(struct Node *header) {
+    if (header->next == header) {
+        printf("List is empty. Deletion failed.\n");
+        return;
+    }
+    struct Node *temp = header->prev;
+    header->prev = temp->prev;
+    temp->prev->next = header;
+    free(temp);
+}
+
+// Function to search for an item by position
+void searchByPosition(struct Node *header, int position) {
+    struct Node *temp = header->next;
+    int count = 1;
+    while (temp != header && count < position) {
+        temp = temp->next;
+        count++;
+    }
+    if (temp == header || count != position) {
+        printf("Position %d is out of range.\n", position);
+    } else {
+        printf("Item at position %d is %d.\n", position, temp->data);
+    }
+}
+
+// Function to insert a node by position
+void insertByPosition(struct Node *header, int data, int position) {
+    struct Node *newNode = createNode(data);
+    struct Node *temp = header->next;
+    int count = 1;
+    while (temp != header && count < position) {
+        temp = temp->next;
+        count++;
+    }
+    if (count != position) {
+        printf("Position %d is out of range. Insertion failed.\n", position);
+        free(newNode);
+        return;
+    }
+    newNode->prev = temp->prev;
+    newNode->next = temp;
+    temp->prev->next = newNode;
+    temp->prev = newNode;
+}
+
+// Function to search for an item by value
+void searchByValue(struct Node *header, int value) {
+    struct Node *temp = header->next;
+    int position = 1;
+    while (temp != header && temp->data != value) {
+        temp = temp->next;
+        position++;
+    }
+    if (temp == header) {
+        printf("Value %d not found in the list.\n", value);
+    } else {
+        printf("Value %d found at position %d.\n", value, position);
+    }
+}
+
+// Function to display the list contents
+void displayList(struct Node *header) {
+    if (header->next == header) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *temp = header->next;
+    printf("List contents: ");
+    while (temp != header) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+int main() {
+    struct Node *header = initializeHeader();
+
+    insertByOrder(header, 5);
+    displayList(header);
+
+    insertByOrder(header, 3);
+    displayList(header);
+
+    insertByOrder(header, 7);
+    displayList(header);
+
+    deleteByPosition(header, 2);
+    displayList(header);
+
+    searchByKey(header, 5);
+    searchByKey(header, 8);
+
+    deleteByKey(header, 3);
+    displayList(header);
+
+    insertFront(header, 10);
+    displayList(header);
+
+    insertRear(header, 8);
+    displayList(header);
+
+    deleteRear(header);
+    displayList(header);
+
+    deleteFront(header);
+    displayList(header);
+
+    searchByPosition(header, 3);
+    searchByPosition(header, 5);
+
+    insertByPosition(header, 6, 2);
+    displayList(header);
+
+    searchByValue(header, 7);
+    searchByValue(header, 9);
+
+    return 0;
+}
