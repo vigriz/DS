@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *prev;
+    struct Node *next;
+};
+
+// Function to create a new node
+struct Node* createNode(int data) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    if (newNode == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->prev = NULL;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to insert a node by order
+void insertByOrder(struct Node *head, int key) {
+    struct Node *newNode = createNode(key);
+    struct Node *temp = head->next;
+    while (temp != head && temp->data < key) {
+        temp = temp->next;
+    }
+    newNode->prev = temp->prev;
+    newNode->next = temp;
+    temp->prev->next = newNode;
+    temp->prev = newNode;
+}
+
+// Function to delete the last node
+void deleteRear(struct Node *head) {
+    if (head->next == head) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
+    }
+    struct Node *toDelete = head->prev;
+    head->prev = toDelete->prev;
+    head->prev->next = head;
+    free(toDelete);
+}
+
+// Function to delete the first node
+void deleteFront(struct Node *head) {
+    if (head->next == head) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
+    }
+    struct Node *toDelete = head->next;
+    head->next = toDelete->next;
+    head->next->prev = head;
+    free(toDelete);
+}
+
+// Function to search for an item by position
+void searchByPosition(struct Node *head, int position) {
+    if (head->next == head) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *temp = head->next;
+    int count = 0;
+    while (temp != head && count < position) {
+        temp = temp->next;
+        count++;
+    }
+    if (temp == head) {
+        printf("Invalid position.\n");
+        return;
+    }
+    printf("Item at position %d is: %d\n", position, temp->data);
+}
+
+// Function to display the contents of the list
+void displayList(struct Node *head) {
+    if (head->next == head) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *temp = head->next;
+    printf("List contents: ");
+    while (temp != head) {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+int main() {
+    struct Node *head = createNode(-1); // Header node
+    head->next = head;
+    head->prev = head;
+
+    int choice, key;
+
+    do {
+        printf("\nMenu:");
+        printf("\n1. Insert by order");
+        printf("\n2. Delete rear");
+        printf("\n3. Delete front");
+        printf("\n4. Search for an item by position");
+        printf("\n5. Display list contents");
+        printf("\n6. Exit");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter key to insert: ");
+                scanf("%d", &key);
+                insertByOrder(head, key);
+                displayList(head);
+                break;
+            case 2:
+                deleteRear(head);
+                displayList(head);
+                break;
+            case 3:
+                deleteFront(head);
+                displayList(head);
+                break;
+            case 4:
+                printf("Enter position to search: ");
+                scanf("%d", &key);
+                searchByPosition(head, key);
+                break;
+            case 5:
+                displayList(head);
+                break;
+            case 6:
+                printf("Exiting program...\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 6);
+
+    // Free allocated memory
+    struct Node *temp;
+    while (head->next != head) {
+        temp = head->next;
+        head->next = temp->next;
+        free(temp);
+    }
+    free(head);
+
+    return 0;
+}
