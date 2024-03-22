@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void displayArray(int *arr, int size) {
+    printf("Array Contents: ");
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+int* insertByOrder(int *arr, int *size, int key) {
+    int i, j;
+    (*size)++;
+    arr = (int*)realloc(arr, (*size) * sizeof(int));
+    for (i = 0; i < *size - 1 && arr[i] < key; i++);
+    for (j = *size - 1; j > i; j--) {
+        arr[j] = arr[j - 1];
+    }
+    arr[i] = key;
+    return arr;
+}
+
+int* deleteByPosition(int *arr, int *size, int pos) {
+    if (pos < 0 || pos >= *size) {
+        printf("Invalid position.\n");
+        return arr;
+    }
+    for (int i = pos; i < *size - 1; i++) {
+        arr[i] = arr[i + 1];
+    }
+    (*size)--;
+    arr = (int*)realloc(arr, (*size) * sizeof(int));
+    return arr;
+}
+
+int searchByKey(int *arr, int size, int key) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void reverseArray(int *arr, int size) {
+    int temp;
+    for (int i = 0; i < size / 2; i++) {
+        temp = arr[i];
+        arr[i] = arr[size - 1 - i];
+        arr[size - 1 - i] = temp;
+    }
+}
+
+int main() {
+    int *arr = NULL;
+    int size = 0, choice, pos, key, found;
+
+    do {
+        printf("\nMenu:");
+        printf("\n1. Insert by order");
+        printf("\n2. Delete by position");
+        printf("\n3. Search by key");
+        printf("\n4. Reverse the contents");
+        printf("\n5. Display array");
+        printf("\n6. Exit");
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("\nEnter key to insert: ");
+                scanf("%d", &key);
+                arr = insertByOrder(arr, &size, key);
+                displayArray(arr, size);
+                break;
+            case 2:
+                printf("\nEnter position to delete: ");
+                scanf("%d", &pos);
+                arr = deleteByPosition(arr, &size, pos);
+                displayArray(arr, size);
+                break;
+            case 3:
+                printf("\nEnter key to search: ");
+                scanf("%d", &key);
+                found = searchByKey(arr, size, key);
+                if (found != -1) {
+                    printf("Key %d found at position %d.\n", key, found);
+                } else {
+                    printf("Key %d not found.\n", key);
+                }
+                break;
+            case 4:
+                printf("\nReversing the array contents.\n");
+                reverseArray(arr, size);
+                displayArray(arr, size);
+                break;
+            case 5:
+                displayArray(arr, size);
+                break;
+            case 6:
+                printf("\nExiting program...\n");
+                break;
+            default:
+                printf("\nInvalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 6);
+
+    free(arr); // Free allocated memory
+    return 0;
+}
