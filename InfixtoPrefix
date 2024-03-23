@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #define MAX_SIZE 20
 
@@ -10,7 +11,7 @@ int top = -1;
 void push(char x) {
     if (top == MAX_SIZE - 1) {
         printf("Stack Overflow\n");
-        return;
+        exit(EXIT_FAILURE);
     }
     stack[++top] = x;
 }
@@ -18,7 +19,7 @@ void push(char x) {
 char pop() {
     if (top == -1) {
         printf("Stack Underflow\n");
-        return -1;
+        exit(EXIT_FAILURE);
     }
     return stack[top--];
 }
@@ -45,16 +46,37 @@ int priority(char x) {
         return -1; // Invalid operator
 }
 
+void reverseString(char *str) {
+    int i, j;
+    char temp;
+    for (i = 0, j = strlen(str) - 1; i < j; i++, j--) {
+        temp = str[i];
+        str[i] = str[j];
+        str[j] = temp;
+    }
+}
+
 void infixToPrefix(char *exp, char *prefix) {
-    int i = 0, j = 0;
+    int i, j;
     char x;
-    while (exp[i] != '\0') {
+    reverseString(exp);
+    for (i = 0, j = 0; exp[i] != '\0'; i++) {
+        if (exp[i] == '(') {
+            exp[i] = ')';
+            i++;
+        } else if (exp[i] == ')') {
+            exp[i] = '(';
+            i++;
+        }
+    }
+
+    for (i = 0; exp[i] != '\0'; i++) {
         if (isalnum(exp[i])) {
             prefix[j++] = exp[i];
-        } else if (exp[i] == ')') {
-            push(exp[i]);
         } else if (exp[i] == '(') {
-            while ((x = pop()) != ')') {
+            push(exp[i]);
+        } else if (exp[i] == ')') {
+            while ((x = pop()) != '(') {
                 prefix[j++] = x;
             }
         } else {
@@ -63,27 +85,17 @@ void infixToPrefix(char *exp, char *prefix) {
             }
             push(exp[i]);
         }
-        i++;
     }
     while (!isEmpty()) {
         prefix[j++] = pop();
     }
     prefix[j] = '\0';
-
-    // Reverse the prefix expression to get the final result
-    int start = 0, end = j - 1;
-    while (start < end) {
-        char temp = prefix[start];
-        prefix[start] = prefix[end];
-        prefix[end] = temp;
-        start++;
-        end--;
-    }
+    reverseString(prefix);
 }
 
 int evaluatePrefix(char *prefix) {
-    int i = 0, operand1, operand2;
-    while (prefix[i] != '\0') {
+    int i, operand1, operand2;
+    for (i = strlen(prefix) - 1; i >= 0; i--) {
         if (isdigit(prefix[i])) {
             push(prefix[i] - '0');
         } else {
@@ -104,10 +116,9 @@ int evaluatePrefix(char *prefix) {
                     break;
                 default:
                     printf("Invalid operator in expression!\n");
-                    return -1;
+                    exit(EXIT_FAILURE);
             }
         }
-        i++;
     }
     return pop();
 }
