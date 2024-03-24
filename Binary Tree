@@ -1,0 +1,185 @@
+//Develop a menu driven program to implement Binary Search tree with the followingoperations. i) Construction ii) Traversals (Pre, In and Post Order) iii) Searching a node by key and displaying its information along with its parent if exists, otherwise a suitablemessage. iv)Counting all nodes. v) Finding height. vi Finding node with the Maximum key value and printing the node details along with the parent. vi) Searching a node by key and deleting if exists ( node to be deleted may be leaf or non- leaf with one child ortwo children)
+
+
+#include <stdio.h> #include <stdlib.h>
+
+
+struct node { int item;
+struct node *llink; struct node *rlink;
+};
+
+
+typedef struct node *NODE;
+
+
+NODE getnode(int X) {
+
+NODE temp = (NODE)malloc(sizeof(struct node)); temp->item = X;
+temp->llink = temp->rlink = NULL; return temp;
+}
+
+
+NODE insert(NODE root, int X) { if (root == NULL)
+return getnode(X);
+
+
+if (X < root->item)
+root->llink = insert(root->llink, X); else
+root->rlink = insert(root->rlink, X);
+ 
+
+return root;
+
+}
+
+
+void inorder(NODE root) { if (root != NULL) {
+inorder(root->llink); printf("%d ", root->item); inorder(root->rlink);
+}
+}
+
+
+void preorder(NODE root) { if (root != NULL) {
+printf("%d ", root->item); preorder(root->llink); preorder(root->rlink);
+}
+}
+
+
+void postorder(NODE root) { if (root != NULL) {
+postorder(root->llink); postorder(root->rlink); printf("%d ", root->item);
+}
+}
+
+
+// Function to search a node by key and display its information along with its parent void searchAndDisplay(NODE root, int key, NODE parent) {
+if (root == NULL) {
+ 
+printf("Key not found\n"); return;
+}
+
+
+if (root->item == key) {
+printf("Node found: %d\n", root->item); if (parent != NULL)
+printf("Parent: %d\n", parent->item); else
+printf("No parent (root node)\n"); return;
+}
+
+
+if (key < root->item) searchAndDisplay(root->llink, key, root);
+else
+
+searchAndDisplay(root->rlink, key, root);
+
+}
+
+
+// Function to count all nodes in the binary search tree int countNodes(NODE root) {
+if (root == NULL) return 0;
+return 1 + countNodes(root->llink) + countNodes(root->rlink);
+}
+
+
+// Function to find the height of the binary search tree int height(NODE root) {
+if (root == NULL) return -1;
+int leftHeight = height(root->llink);
+ 
+int rightHeight = height(root->rlink);
+return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
+
+}
+
+
+// Function to find the node with the maximum key value and print its details along with the parent void findMaxAndDisplay(NODE root, NODE parent) {
+if (root == NULL) return;
+if (root->rlink == NULL) {
+
+printf("Node with maximum key value: %d\n", root->item); if (parent != NULL)
+printf("Parent: %d\n", parent->item); else
+printf("No parent (root node)\n");
+} else {
+findMaxAndDisplay(root->rlink, root);
+
+}
+}
+
+
+// Function to search a node by key and delete it if exists NODE deleteNode(NODE root, int key) {
+if (root == NULL) return root;
+
+
+if (key < root->item)
+
+root->llink = deleteNode(root->llink, key); else if (key > root->item)
+root->rlink = deleteNode(root->rlink, key); else {
+if (root->llink == NULL) { NODE temp = root->rlink;
+ 
+free(root); return temp;
+} else if (root->rlink == NULL) { NODE temp = root->llink; free(root);
+return temp;
+}
+
+
+NODE temp = root->rlink; while (temp->llink != NULL)
+temp = temp->llink;
+
+
+root->item = temp->item;
+root->rlink = deleteNode(root->rlink, temp->item);
+
+}
+return root;
+
+}
+
+
+int main() {
+int choice, X; NODE root = NULL;
+
+printf("Menu\n1.Insert\n2.InOrder\n3.PreOrder\n4.PostOrder\n5.Search and Display\n6.Count Nodes\n7.Height\n8.Find Maximum and Display\n9.Delete Node\n10.Exit\n");
+
+
+for (;;) {
+printf("Enter Your Choice : "); scanf("%d", &choice);
+
+switch (choice) { case 1:
+ 
+printf("Enter an Element : "); scanf("%d", &X);
+root = insert(root, X); break;
+case 2:
+printf("InOrder Traversal: "); inorder(root);
+printf("\n"); break;
+case 3:
+printf("PreOrder Traversal: "); preorder(root);
+printf("\n"); break;
+case 4:
+printf("PostOrder Traversal: "); postorder(root);
+printf("\n"); break;
+case 5:
+printf("Enter key to search: "); scanf("%d", &X); searchAndDisplay(root, X, NULL); break;
+case 6:
+
+printf("Number of nodes: %d\n", countNodes(root)); break;
+case 7:
+
+printf("Height of the tree: %d\n", height(root)); break;
+case 8:
+ 
+findMaxAndDisplay(root, NULL); break;
+case 9:
+printf("Enter key to delete: "); scanf("%d", &X);
+root = deleteNode(root, X);
+printf("Node with key %d deleted if found.\n", X); break;
+case 10:
+
+printf("!!THANK YOU!!\n"); exit(0);
+default:
+printf("Invalid Choice\n");
+
+}
+
+}
+
+
+return 0;
+
+}
