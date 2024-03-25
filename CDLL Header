@@ -20,222 +20,458 @@ struct Node* createNode(int data) {
     return newNode;
 }
 
-// Function to insert a node by order
-void insertByOrder(struct Node *head, int key) {
-    struct Node *newNode = createNode(key);
-    struct Node *temp = head->next;
-    while (temp != head && temp->data < key) {
-        temp = temp->next;
+// Function to insert a node at the front
+void insertFront(struct Node **head, int data) {
+    struct Node *newNode = createNode(data);
+    if (*head == NULL) {
+        newNode->next = newNode;  // Circular linkage
+        newNode->prev = newNode;
+        *head = newNode;
+    } else {
+        newNode->next = *head;
+        newNode->prev = (*head)->prev;
+        (*head)->prev->next = newNode;
+        (*head)->prev = newNode;
+        *head = newNode;
     }
-    newNode->prev = temp->prev;
-    newNode->next = temp;
-    temp->prev->next = newNode;
-    temp->prev = newNode;
 }
 
-// Function to delete a node by position
-void deleteByPosition(struct Node *head, int position) {
-    if (head->next == head) {
-        printf("List is empty. Nothing to delete.\n");
-        return;
+// Function to insert a node at the rear
+void insertRear(struct Node **head, int data) {
+    struct Node *newNode = createNode(data);
+    if (*head == NULL) {
+        insertFront(head, data);
+    } else {
+        struct Node *last = (*head)->prev;
+        newNode->next = *head;
+        newNode->prev = last;
+        last->next = newNode;
+        (*head)->prev = newNode;
     }
-    struct Node *temp = head->next;
-    int count = 0;
-    while (temp != head && count < position) {
-        temp = temp->next;
-        count++;
-    }
-    if (temp == head) {
+}
+
+// Function to insert a node by position
+void insertByPosition(struct Node **head, int position, int data) {
+    if (position <= 0) {
         printf("Invalid position.\n");
         return;
     }
-    temp->prev->next = temp->next;
-    temp->next->prev = temp->prev;
-    free(temp);
+    if (position == 1) {
+        insertFront(head, data);
+        return;
+    }
+    struct Node *newNode = createNode(data);
+    struct Node *current = *head;
+    int count = 1;
+    while (count < position - 1 && current->next != *head) {
+        current = current->next;
+        count++;
+    }
+    if (current->next == *head && count != position - 1) {
+        printf("Invalid position.\n");
+        return;
+    }
+    newNode->next = current->next;
+    newNode->prev = current;
+    current->next->prev = newNode;
+    current->next = newNode;
+}
+
+// Function to insert a node by order/key
+void insertByOrder(struct Node **head, int data) {
+    struct Node *newNode = createNode(data);
+    if (*head == NULL || data < (*head)->data) {
+        insertFront(head, data);
+        return;
+    }
+    struct Node *current = *head;
+    while (current->next != *head && current->next->data < data) {
+        current = current->next;
+    }
+    newNode->next = current->next;
+    newNode->prev = current;
+    current->next->prev = newNode;
+    current->next = newNode;
+}
+
+// Function to delete the first node
+void deleteFront(struct Node **head) {
+    if (*head == NULL) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
+    }
+    if ((*head)->next == *head) {
+        free(*head);
+        *head = NULL;
+    } else {
+        struct Node *last = (*head)->prev;
+        struct Node *temp = *head;
+        last->next = temp->next;
+        temp->next->prev = last;
+        *head = temp->next;
+        free(temp);
+    }
+}
+
+// Function to delete the last node
+void deleteRear(struct Node **head) {
+    if (*head == NULL) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
+    }
+    if ((*head)->next == *head) {
+        free(*head);
+        *head = NULL;
+    } else {
+        struct Node *last = (*head)->prev;
+        struct Node *temp = last;
+        last->prev->next = *head;
+        (*head)->prev = last->prev;
+        free(temp);
+    }
+}
+
+// Function to delete a node by position
+void deleteByPosition(struct Node **head, int position) {
+    if (*head == NULL) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
+    }
+    if (position <= 0) {
+        printf("Invalid position.\n");
+        return;
+    }
+    if (position == 1) {
+        deleteFront(head);
+        return;
+    }
+    struct Node *current = *head;
+    int count = 1;
+    while (count < position && current->next != *head) {
+        current = current->next;
+        count++;
+    }
+    if (current == *head) {
+        printf("Invalid position.\n");
+        return;
+    }
+    current->prev->next = current->next;
+    current->next->prev = current->prev;
+    free(current);
 }
 
 // Function to delete a node by key
-void deleteByKey(struct Node *head, int key) {
-    struct Node *temp = head->next;
-    while (temp != head && temp->data != key) {
-        temp = temp->next;
+void deleteByKey(struct Node **head, int key) {
+    if (*head == NULL) {
+        printf("List is empty. Nothing to delete.\n");
+        return;
     }
-    if (temp == head) {
+    struct Node *current = *head;
+    while (current->data != key && current->next != *head) {
+        current = current->next;
+    }
+    if (current->data != key) {
         printf("Key not found.\n");
         return;
     }
-    temp->prev->next = temp->next;
-    temp->next->prev = temp->prev;
-    free(temp);
+    if (current == *head) {
+        deleteFront(head);
+        return;
+    }
+    current->prev->next = current->next;
+    current->next->prev = current->prev;
+    free(current);
+}
+
+// Function to search for an item by key
+void searchByKey(struct Node *head, int key) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
+    }
+    if (current->data == key) {
+        printf("Key %d found at position %d.\n", key, position);
+    } else {
+        printf("Key not found.\n");
+    }
 }
 
 // Function to search for an item by position
 void searchByPosition(struct Node *head, int position) {
-    if (head->next == head) {
+    if (head == NULL) {
         printf("List is empty.\n");
         return;
     }
-    struct Node *temp = head->next;
-    int count = 0;
-    while (temp != head && count < position) {
-        temp = temp->next;
+    struct Node *current = head;
+    int count = 1;
+    while (count < position && current->next != head) {
+        current = current->next;
         count++;
     }
-    if (temp == head) {
+    if (current == head && count != position) {
         printf("Invalid position.\n");
         return;
     }
-    printf("Item at position %d is: %d\n", position, temp->data);
+    printf("Item at position %d is: %d\n", position, current->data);
+}
+
+// Function to search for an item by value
+void searchByValue(struct Node *head, int key) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
+    }
+    if (current->data == key) {
+        printf("Item %d found at position %d.\n", key, position);
+    } else {
+        printf("Item not found.\n");
+    }
 }
 
 // Function to display the contents of the list
 void displayList(struct Node *head) {
-    if (head->next == head) {
+    if (head == NULL) {
         printf("List is empty.\n");
         return;
     }
-    struct Node *temp = head->next;
+    struct Node *current = head;
     printf("List contents: ");
-    while (temp != head) {
-        printf("%d ", temp->data);
-        temp = temp->next;
-    }
+    do {
+        printf("%d ", current->data);
+        current = current->next;
+    } while (current != head);
     printf("\n");
 }
 
-void insertFront(struct Node *head, int key) {
-    struct Node *newNode = createNode(key);
-    newNode->next = head->next;
-    newNode->prev = head;
-    head->next->prev = newNode;
-    head->next = newNode;
-}
+int main() {
+    struct Node *head = NULL;
 
-// Function to insert a node at the rear
-void insertRear(struct Node *head, int key) {
-    struct Node *newNode = createNode(key);
-    struct Node *temp = head->prev;
-    newNode->prev = temp;
-    newNode->next = head;
-    head->prev = newNode;
-    temp->next = newNode;
-}
+    int choice, key, position;
 
-
-// Function to search for an item by key
-void searchByKey(struct Node *head, int key) {
-    if (head->next == head) {
+    do {
         printf("List is empty.\n");
         return;
     }
-    struct Node *temp = head->next;
-    while (temp != head && temp->data != key) {
-        temp = temp->next;
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
     }
-    if (temp == head) {
-        printf("Key not found.\n");
+    if (current->data == key) {
+        printf("Item %d found at position %d.\n", key, position);
     } else {
-        printf("Key %d found.\n", key);
+        printf("Item not found.\n");
     }
 }
 
-
-
-// Function to delete the last node
-void deleteRear(struct Node *head) {
-    if (head->next == head) {
-        printf("List is empty. Nothing to delete.\n");
+// Function to display the contents of the list
+void displayList(struct Node *head) {
+    if (head == NULL) {
+        printf("List is empty.\n");
         return;
     }
-    struct Node *toDelete = head->prev;
-    head->prev = toDelete->prev;
-    head->prev->next = head;
-    free(toDelete);
+    struct Node *current = head;
+    printf("List contents: ");
+    do {
+        printf("%d ", current->data);
+        current = current->next;
+    } while (current != head);
+    printf("\n");
 }
-
-// Function to delete the first node
-void deleteFront(struct Node *head) {
-    if (head->next == head) {
-        printf("List is empty. Nothing to delete.\n");
-        return;
-    }
-    struct Node *toDelete = head->next;
-    head->next = toDelete->next;
-    head->next->prev = head;
-    free(toDelete);
-}
-
 
 int main() {
-    struct Node *head = createNode(-1); // Header node
-    head->next = head;
-    head->prev = head;
+    struct Node *head = NULL;
+
+    int choice, key, position;
+
+    do {
+        printf
+("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
+    }
+    if (current->data == key) {
+        printf("Item %d found at position %d.\n", key, position);
+    } else {
+        printf("Item not found.\n");
+    }
+}
+
+// Function to display the contents of the list
+void displayList(struct Node *head) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    printf("List contents: ");
+    do {
+        printf("%d ", current->data);
+        current = current->next;
+    } while (current != head);
+    printf("\n");
+}
+
+int main() {
+    struct Node *head = NULL;
+
+    int choice, key, position;
+
+    do {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
+    }
+    if (current->data == key) {
+        printf("Item %d found at position %d.\n", key, position);
+    } else {
+        printf("Item not found.\n");
+    }
+}
+
+// Function to display the contents of the list
+void displayList(struct Node *head) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    printf("List contents: ");
+    do {
+        printf("%d ", current->data);
+        current = current->next;
+    } while (current != head);
+    printf("\n");
+}
+
+int main() {
+    struct Node *head = NULL;
+
+    int choice, key, position;
+
+    do {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    int position = 1;
+    while (current->data != key && current->next != head) {
+        current = current->next;
+        position++;
+    }
+    if (current->data == key) {
+        printf("Item %d found at position %d.\n", key, position);
+    } else {
+        printf("Item not found.\n");
+    }
+}
+
+// Function to display the contents of the list
+void displayList(struct Node *head) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node *current = head;
+    printf("List contents: ");
+    do {
+        printf("%d ", current->data);
+        current = current->next;
+    } while (current != head);
+    printf("\n");
+}
+
+int main() {
+    struct Node *head = NULL;
 
     int choice, key, position;
 
     do {
         printf("\nMenu:");
-        printf("\n1. Insert by order");
-        printf("\n2. Delete by position");
-        printf("\n3. Delete by key");
-        printf("\n4. Search by position");
-        printf("\n5. Display list contents");
-        printf("\n6. Insert at front");
-        printf("\n7. Insert at rear");
-        printf("\n8. Search by key");
-         printf("\n9. Insert by order");
-        printf("\n10. Delete rear");
-        printf("\n11. Delete front");
-        printf("\n12. Search for an item by position");
-        printf("\n13. Display list contents");
-        printf("\n14. Exit");
+        printf("\n1. Insert Front");
+        printf("\n2. Insert Rear");
+        printf("\n3. Insert by Position");
+        printf("\n4. Insert by Order/Key");
+        printf("\n5. Delete Front");
+        printf("\n6. Delete Rear");
+        printf("\n7. Delete by Position");
+        printf("\n8. Delete by Key");
+        printf("\n9. Search for an item by key");
+        printf("\n10. Search for an item by position");
+        printf("\n11. Search for an item by value");
+        printf("\n12. Exit");
         printf("\nEnter your choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
+           
             case 1:
-                printf("Enter key to insert: ");
+                printf("Enter data to insert at the front: ");
                 scanf("%d", &key);
-                insertByOrder(head, key);
+                insertFront(&head, key);
                 displayList(head);
                 break;
             case 2:
-                printf("Enter position to delete: ");
-                scanf("%d", &position);
-                deleteByPosition(head, position);
+                printf("Enter data to insert at the rear: ");
+                scanf("%d", &key);
+                insertRear(&head, key);
                 displayList(head);
                 break;
             case 3:
-                printf("Enter key to delete: ");
+                printf("Enter position to insert: ");
+                scanf("%d", &position);
+                printf("Enter data to insert: ");
                 scanf("%d", &key);
-                deleteByKey(head, key);
+                insertByPosition(&head, position, key);
                 displayList(head);
                 break;
             case 4:
-                printf("Enter position to search: ");
-                scanf("%d", &position);
-                searchByPosition(head, position);
-                break;
-            case 5:
+                printf("Enter data to insert: ");
+                scanf("%d", &key);
+                insertByOrder(&head, key);
                 displayList(head);
                 break;
-           
+            case 5:
+                deleteFront(&head);
+                displayList(head);
+                break;
             case 6:
-                printf("Enter key to insert at front: ");
-                scanf("%d", &key);
-                insertFront(head, key);
+                deleteRear(&head);
                 displayList(head);
                 break;
             case 7:
-                printf("Enter key to insert at rear: ");
-                scanf("%d", &key);
-                insertRear(head, key);
+                printf("Enter position to delete: ");
+                scanf("%d", &position);
+                deleteByPosition(&head, position);
                 displayList(head);
                 break;
             case 8:
-                printf("Enter position to delete: ");
-                scanf("%d", &position);
-                deleteByPosition(head, position);
+                printf("Enter key to delete: ");
+                scanf("%d", &key);
+                deleteByKey(&head, key);
                 displayList(head);
                 break;
             case 9:
@@ -243,41 +479,32 @@ int main() {
                 scanf("%d", &key);
                 searchByKey(head, key);
                 break;
-             case 10:
-                printf("Enter key to insert: ");
-                scanf("%d", &key);
-                insertByOrder(head, key);
-                displayList(head);
+            case 10:
+                printf("Enter position to search: ");
+                scanf("%d", &position);
+                searchByPosition(head, position);
                 break;
             case 11:
-                deleteRear(head);
-                displayList(head);
+                printf("Enter value to search: ");
+                scanf("%d", &key);
+                searchByValue(head, key);
                 break;
             case 12:
-                deleteFront(head);
-                displayList(head);
-                break;
-            case 13:
-                printf("Enter position to search: ");
-                scanf("%d", &key);
-                searchByPosition(head, key);
-                break;
-            case 14:
                 printf("Exiting program...\n");
                 break;
             default:
                 printf("Invalid choice! Please enter a valid option.\n");
         }
-    } while (choice != 6);
+    } while (choice != 12);
 
     // Free allocated memory
     struct Node *temp;
-    while (head->next != head) {
+    while (head != NULL) {
         temp = head->next;
-        head->next = temp->next;
-        free(temp);
+        free(head);
+        head = temp;
+        if (temp == NULL) break;  // Prevents infinite loop if head was already freed
     }
-    free(head);
 
     return 0;
 }
